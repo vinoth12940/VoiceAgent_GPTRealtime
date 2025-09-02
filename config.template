@@ -1,0 +1,23 @@
+# Environment Configuration Template
+# Copy this file to .env and fill in your actual values
+
+# OpenAI Configuration (Required)
+OPENAI_API_KEY=your-openai-api-key-here
+
+# Application Configuration
+APP_ORIGIN=http://127.0.0.1:8001
+DB_PATH=policies.db
+ADMIN_SECRET=change-me-in-production
+
+# Realtime API Configuration
+REALTIME_MODEL=gpt-realtime
+REALTIME_VOICE=alloy
+
+# Server Configuration (Optional)
+# PORT=8001
+# HOST=0.0.0.0
+
+# Instructions:
+# 1. Copy this file: cp config.template .env
+# 2. Edit .env with your actual OpenAI API key
+# 3. Adjust other settings as needed for your environment

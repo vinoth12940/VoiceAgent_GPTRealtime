@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Realtime CSR Voice Agent</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-b from-slate-50 to-slate-100 min-h-screen">
+  <div class="max-w-5xl mx-auto p-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-xl bg-blue-600 text-white grid place-items-center font-bold shadow">
+          VA
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold text-slate-800">Realtime CSR Voice Agent</h1>
+          <p class="text-slate-500 text-sm">Secure, verified policy assistance over voice</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="inline-flex items-center gap-2 text-sm">
+          <span class="h-2.5 w-2.5 rounded-full bg-slate-300" id="statusDot"></span>
+          <span id="status" class="text-slate-600">idle</span>
+        </span>
+        <button id="connectBtn"
+                class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 shadow">
+          Connect
+        </button>
+        <button id="disconnectBtn"
+                class="px-4 py-2 rounded-lg bg-slate-200 text-slate-800 hover:bg-slate-300">
+          Disconnect
+        </button>
+      </div>
+    </div>
+
+    <!-- Instructions Banner -->
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+      <div class="flex items-start gap-3">
+        <div class="text-blue-600 mt-0.5">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-semibold text-blue-800 mb-2">How to Use This Voice Agent</h3>
+          <ol class="text-sm text-blue-700 space-y-1 list-decimal list-inside">
+            <li><strong>Connect:</strong> Click "Connect" to establish connection with GPT Realtime</li>
+            <li><strong>Verify Customer:</strong> Fill in customer details and click "Submit Verification"</li>
+            <li><strong>Ask Questions:</strong> Use voice or ask about policies - the AI will automatically verify customers when needed</li>
+            <li><strong>Tool Integration:</strong> The AI automatically uses tools to verify customers and fetch policies</li>
+          </ol>
+          <div class="mt-3 text-xs text-blue-600">
+            💡 <strong>Pro Tip:</strong> Try asking "What are the policies about health coverage?" - the AI will verify you first!
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="grid lg:grid-cols-3 gap-6">
+      <!-- Left: Controls & Verification -->
+      <div class="lg:col-span-1 space-y-6">
+        <!-- Call info -->
+        <div class="bg-white rounded-2xl shadow border border-slate-200 p-5">
+          <h2 class="font-semibold text-slate-800 mb-3">Call</h2>
+          <audio id="remoteAudio" autoplay class="w-full mt-2"></audio>
+          <p class="text-xs text-slate-500 mt-3">
+            Your microphone will be used while connected. Audio from the agent plays here.
+          </p>
+        </div>
+
+        <!-- Verification -->
+        <div class="bg-white rounded-2xl shadow border border-slate-200 p-5">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="font-semibold text-slate-800">Customer Verification</h2>
+            <span id="verifyStatusBadge"
+                  class="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600">Not verified</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <input id="vEmail" class="border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-200"
+                   placeholder="Email (required)"/>
+            <input id="vName" class="border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-200"
+                   placeholder="Full name (optional)"/>
+            <input id="vLast4" class="border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-200"
+                   placeholder="Last 4 SSN (opt)"/>
+            <input id="vOrder" class="border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-200"
+                   placeholder="Order/Policy ID (opt)"/>
+          </div>
+          <div class="flex gap-2 mt-3">
+            <button id="verifyBtn"
+                    class="flex-1 px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
+              Submit Verification
+            </button>
+            <button id="demoBtn"
+                    class="px-4 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 text-sm">
+              Demo Data
+            </button>
+          </div>
+          <p id="verifyStatus" class="text-xs text-slate-500 mt-2"></p>
+        </div>
+
+        <!-- Policies list -->
+        <div class="bg-white rounded-2xl shadow border border-slate-200 p-5">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="font-semibold text-slate-800">Available Policies</h2>
+            <button id="refreshPolicies"
+                    class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm">
+              Refresh
+            </button>
+          </div>
+          <div id="policyList" class="divide-y divide-slate-100 text-sm">
+            <!-- filled by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Transcript -->
+      <div class="lg:col-span-2">
+        <div class="bg-white rounded-2xl shadow border border-slate-200 h-[560px] flex flex-col">
+          <div class="px-5 py-4 border-b border-slate-100">
+            <h2 class="font-semibold text-slate-800">Live Transcript</h2>
+            <p class="text-xs text-slate-500">Partial lines appear as the dots animate; finalized lines will solidify.</p>
+          </div>
+          <div id="transcript"
+               class="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+            <!-- chat bubbles injected here -->
+            <div class="text-center text-slate-400 text-sm py-8">
+              <div class="mb-2">🎤</div>
+              <div>Click "Connect" to start your conversation</div>
+              <div class="text-xs mt-1">The AI will help you with policies and customer verification</div>
+            </div>
+          </div>
+          <div class="px-5 py-4 border-t border-slate-100 text-xs text-slate-500">
+            <div class="flex items-center justify-between">
+              <div>
+                💡 <strong>Try these examples:</strong> "Auto policy coverage details" • "Health insurance benefits" • "Verify customer john@example.com"
+              </div>
+              <div class="text-slate-400">
+                Status: <span id="connectionStatus">Not connected</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Troubleshooting Section -->
+    <div class="mt-8 bg-amber-50 border border-amber-200 rounded-lg p-4">
+      <div class="flex items-start gap-3">
+        <div class="text-amber-600 mt-0.5">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-semibold text-amber-800 mb-2">Troubleshooting</h3>
+          <div class="text-sm text-amber-700 space-y-2">
+            <div><strong>Connection Issues:</strong> Check browser console (F12) for error messages</div>
+            <div><strong>Microphone Access:</strong> Allow microphone permissions when prompted</div>
+            <div><strong>API Errors:</strong> Verify your OpenAI API key has GPT Realtime access</div>
+            <div><strong>Tool Calling:</strong> The AI automatically uses tools - no manual intervention needed</div>
+          </div>
+          <div class="mt-3 text-xs text-amber-600">
+            🔍 <strong>Debug:</strong> Open browser console (F12) to see detailed connection logs
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
