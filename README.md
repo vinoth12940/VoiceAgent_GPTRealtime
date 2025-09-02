@@ -1,6 +1,22 @@
 # 🎙️ Voice Agent GPT Realtime
 
+[![GitHub Repository](https://img.shields.io/badge/GitHub-VoiceAgent_GPTRealtime-blue?style=for-the-badge&logo=github)](https://github.com/vinoth12940/VoiceAgent_GPTRealtime)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.8+-blue?style=for-the-badge&logo=python)](requirements.txt)
+[![OpenAI](https://img.shields.io/badge/OpenAI-Realtime_API-orange?style=for-the-badge&logo=openai)](https://platform.openai.com/docs/guides/realtime-websocket)
+
 A sophisticated real-time voice AI agent powered by OpenAI's latest GPT Realtime API, featuring advanced tool calling capabilities for P&C (Property & Casualty) insurance customer service.
+
+## 📚 **Documentation Suite**
+
+| Document | Description | Quick Access |
+|----------|-------------|--------------|
+| 📖 **[README.md](README.md)** | Complete technical documentation | *You are here* |
+| 🚀 **[QUICK_START.md](QUICK_START.md)** | 5-minute setup guide | [Get started instantly →](QUICK_START.md) |
+| 📊 **[EXECUTIVE_SUMMARY.md](EXECUTIVE_SUMMARY.md)** | Business case & ROI analysis | [View business impact →](EXECUTIVE_SUMMARY.md) |
+| 🔄 **[WORKFLOW_ANALYSIS.md](WORKFLOW_ANALYSIS.md)** | Detailed workflow & cost analysis | [See cost savings →](WORKFLOW_ANALYSIS.md) |
+
+**🎯 New to this project?** Start with the **[Quick Start Guide](QUICK_START.md)** for immediate setup, or review the **[Executive Summary](EXECUTIVE_SUMMARY.md)** for business impact.
 
 ## 🌟 Features
 
@@ -42,8 +58,8 @@ Frontend (WebSocket) ←→ Backend (FastAPI) ←→ OpenAI Realtime API
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
-   cd VoiceAgentGPTRealtime
+   git clone https://github.com/vinoth12940/VoiceAgent_GPTRealtime.git
+   cd VoiceAgent_GPTRealtime
    ```
 
 2. **Create virtual environment**
@@ -313,6 +329,20 @@ Enable detailed logging:
 
 ## 📚 Resources & Documentation
 
+### **Project Documentation**
+- **[📖 README.md](README.md)** - Complete technical documentation *(You are here)*
+- **[🚀 QUICK_START.md](QUICK_START.md)** - Get up and running in 5 minutes
+- **[📊 EXECUTIVE_SUMMARY.md](EXECUTIVE_SUMMARY.md)** - Business case, ROI analysis (335% ROI)
+- **[🔄 WORKFLOW_ANALYSIS.md](WORKFLOW_ANALYSIS.md)** - Detailed cost-benefit analysis ($431K savings)
+- **[📄 LICENSE](LICENSE)** - MIT License for open source use
+
+### **GitHub Repository**
+- **[🔗 Main Repository](https://github.com/vinoth12940/VoiceAgent_GPTRealtime)** - Complete source code
+- **[📋 Issues](https://github.com/vinoth12940/VoiceAgent_GPTRealtime/issues)** - Bug reports and feature requests
+- **[🔀 Pull Requests](https://github.com/vinoth12940/VoiceAgent_GPTRealtime/pulls)** - Code contributions
+- **[📈 Insights](https://github.com/vinoth12940/VoiceAgent_GPTRealtime/pulse)** - Repository analytics
+
+### **External References**
 - **[OpenAI Realtime API](https://platform.openai.com/docs/guides/realtime-websocket)** - Official API documentation
 - **[Realtime Prompting Guide](https://cookbook.openai.com/examples/realtime_prompting_guide)** - Best practices for prompting
 - **[FastAPI Documentation](https://fastapi.tiangolo.com/)** - Backend framework docs
@@ -321,11 +351,14 @@ Enable detailed logging:
 
 ## 🤝 Contributing
 
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
-3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
-4. **Push** to the branch (`git push origin feature/amazing-feature`)
-5. **Open** a Pull Request
+We welcome contributions to the Voice Agent GPT Realtime project! Here's how to get started:
+
+1. **Fork** the [repository](https://github.com/vinoth12940/VoiceAgent_GPTRealtime)
+2. **Clone** your fork (`git clone https://github.com/YOUR_USERNAME/VoiceAgent_GPTRealtime.git`)
+3. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+4. **Commit** your changes (`git commit -m 'Add amazing feature'`)
+5. **Push** to the branch (`git push origin feature/amazing-feature`)
+6. **Open** a [Pull Request](https://github.com/vinoth12940/VoiceAgent_GPTRealtime/pulls)
 
 ### Development Guidelines
 
@@ -344,12 +377,20 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 For issues, questions, and feature requests:
 
 1. **Check** the troubleshooting section above
-2. **Review** browser console and backend logs
+2. **Review** browser console and backend logs  
 3. **Test** with demo customer data
-4. **Open** an issue with detailed error information and steps to reproduce
+4. **Open** an [issue](https://github.com/vinoth12940/VoiceAgent_GPTRealtime/issues) with detailed error information and steps to reproduce
+
+### **Quick Links**
+- 🐛 **[Report Bug](https://github.com/vinoth12940/VoiceAgent_GPTRealtime/issues/new)** - Found an issue? Let us know!
+- 💡 **[Request Feature](https://github.com/vinoth12940/VoiceAgent_GPTRealtime/issues/new)** - Have an idea? Share it!
+- 📖 **[Documentation](https://github.com/vinoth12940/VoiceAgent_GPTRealtime#readme)** - Complete project docs
+- 🚀 **[Quick Start](QUICK_START.md)** - Get started in 5 minutes
 
 ---
 
 **🎉 Built with ❤️ using OpenAI's GPT Realtime API**
 
 *Experience the future of voice-powered customer service with natural, intelligent conversations.*
+
+**⭐ Star this repository** on [GitHub](https://github.com/vinoth12940/VoiceAgent_GPTRealtime) if you found it helpful!
