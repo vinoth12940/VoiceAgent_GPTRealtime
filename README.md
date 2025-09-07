@@ -56,6 +56,31 @@ Frontend (WebSocket) ←→ Backend (FastAPI) ←→ OpenAI Realtime API
 
 ### Quick Setup
 
+#### Option 1: Automated Setup (Recommended)
+
+1. **Clone and run setup script**
+   ```bash
+   git clone https://github.com/vinoth12940/VoiceAgent_GPTRealtime.git
+   cd VoiceAgent_GPTRealtime
+   ./setup.sh
+   ```
+
+2. **Configure OpenAI API key**
+   ```bash
+   cp config.template backend/config.py
+   # Edit backend/config.py and add your OpenAI API key
+   ```
+
+3. **Start the server**
+   ```bash
+   cd backend && python -m uvicorn main:app --reload
+   ```
+
+4. **Open your browser**
+   Navigate to `http://localhost:8000`
+
+#### Option 2: Manual Setup
+
 1. **Clone the repository**
    ```bash
    git clone https://github.com/vinoth12940/VoiceAgent_GPTRealtime.git
@@ -73,17 +98,22 @@ Frontend (WebSocket) ←→ Backend (FastAPI) ←→ OpenAI Realtime API
    pip install -r requirements.txt
    ```
 
-4. **Configure environment**
+4. **Initialize database**
+   ```bash
+   python init_db.py
+   ```
+
+5. **Configure environment**
    ```bash
    export OPENAI_API_KEY="your-openai-api-key-here"
    ```
 
-5. **Start the server**
+6. **Start the server**
    ```bash
    uvicorn backend.main:app --reload --host 0.0.0.0 --port 8001
    ```
 
-6. **Open your browser**
+7. **Open your browser**
    Navigate to `http://localhost:8001`
 
 ## 🚀 Usage
@@ -157,6 +187,47 @@ User Voice Input → OpenAI Realtime → Function Call Detection → Backend Too
 - **Access Control**: Internal/restricted policies require customer verification
 - **Secure API Proxy**: Server-side OpenAI API key management
 - **Data Protection**: Customer data validation and sanitization
+
+## 🗄️ Database Management
+
+### Database Initialization
+
+The project includes an automated database initialization system:
+
+#### init_db.py Script
+
+```bash
+# Initialize database with sample data (safe to run multiple times)
+python init_db.py
+
+# Force re-initialization (useful for development)
+python init_db.py --force
+
+# Get help
+python init_db.py --help
+```
+
+**Features:**
+- ✅ **Safe to run multiple times** - won't break existing data
+- 🔄 **Smart detection** - only seeds if database is empty
+- 🌱 **Sample data included** - P&C policies, customers, and customer policies
+- 📊 **Progress reporting** - shows what's being added
+- 🔧 **Force option** - re-seed for development/testing
+
+#### What Gets Created
+
+The initialization script creates:
+1. **Database Schema** - All required tables with proper relationships
+2. **P&C Insurance Policies** - 6 sample policies (auto, home, commercial, etc.)
+3. **Sample Customers** - 7 test customers with verification data
+4. **Customer Policies** - 5 sample insurance policies with realistic data
+
+#### Fresh Machine Setup
+
+When cloning to a new machine:
+1. The database file (`policies.db`) is not included in git
+2. Run `python init_db.py` to create and populate the database
+3. Or use the automated setup script: `./setup.sh`
 
 ## 📊 Database Schema
 
@@ -250,10 +321,15 @@ VoiceAgentGPTRealtime/
 ├── frontend/
 │   ├── index.html       # Main UI with Tailwind CSS
 │   └── app.js           # WebSocket client and audio processing
-├── policies.db          # SQLite database with P&C data
-├── requirements.txt     # Python dependencies
-├── README.md           # This documentation
-└── QUICK_START.md      # Quick setup guide
+├── init_db.py          # Database initialization script
+├── setup.sh            # Automated setup script for new machines
+├── policies.db         # SQLite database with P&C data (created by init_db.py)
+├── config.template     # Configuration template
+├── requirements.txt    # Python dependencies
+├── README.md          # This documentation
+├── QUICK_START.md     # Quick setup guide
+├── EXECUTIVE_SUMMARY.md # Business case & ROI analysis
+└── WORKFLOW_ANALYSIS.md # Detailed workflow & cost analysis
 ```
 
 ## ⚙️ Configuration
