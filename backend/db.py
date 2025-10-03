@@ -110,21 +110,43 @@ def list_policies():
     return rows
 
 def verify_customer(email: str, full_name: str = "", last4: str = "", order_id: str = ""):
+    print(f"\n{'='*80}")
+    print(f"🔍 VERIFICATION ATTEMPT")
+    print(f"{'='*80}")
+    print(f"Provided values:")
+    print(f"  Email: '{email}'")
+    print(f"  Full Name: '{full_name}'")
+    print(f"  Last4: '{last4}'")
+    print(f"  Order ID: '{order_id}'")
+    
     conn = _conn()
     c = conn.cursor()
     c.execute("SELECT * FROM customers WHERE email = ?", (email.lower(),))
     row = c.fetchone()
     conn.close()
+    
     if not row:
+        print(f"❌ Customer not found in database for email: {email}")
+        print(f"{'='*80}\n")
         return False
+    
+    print(f"\nDatabase values:")
+    print(f"  Full Name: '{row['full_name']}'")
+    print(f"  Last4: '{row['last4']}'")
+    print(f"  Order ID: '{row['order_id']}'")
     
     # Flexible name matching - handle common variations
     if full_name:
         provided_name = full_name.strip().lower()
         actual_name = row["full_name"].lower()
         
+        print(f"\nName comparison:")
+        print(f"  Provided (normalized): '{provided_name}'")
+        print(f"  Database (normalized): '{actual_name}'")
+        
         # Exact match
         ok_name = provided_name == actual_name
+        print(f"  Exact match: {ok_name}")
         
         # If not exact, try common spelling variations
         if not ok_name:
@@ -137,12 +159,24 @@ def verify_customer(email: str, full_name: str = "", last4: str = "", order_id: 
             for old, new in variations.items():
                 normalized_provided = normalized_provided.replace(old, new)
             ok_name = normalized_provided == actual_name
+            print(f"  After variations: {ok_name} (normalized: '{normalized_provided}')")
     else:
         ok_name = True
+        print(f"\nName check: SKIPPED (no name provided)")
     
     ok_last4 = (not last4) or (last4 == (row["last4"] or ""))
     ok_order = (not order_id) or (order_id == (row["order_id"] or ""))
-    return bool(ok_name and ok_last4 and ok_order)
+    
+    print(f"\nVerification results:")
+    print(f"  Name match: {ok_name}")
+    print(f"  Last4 match: {ok_last4}")
+    print(f"  Order ID match: {ok_order}")
+    
+    final_result = bool(ok_name and ok_last4 and ok_order)
+    print(f"\n{'✅ VERIFIED' if final_result else '❌ VERIFICATION FAILED'}")
+    print(f"{'='*80}\n")
+    
+    return final_result
 
 def log(actor: str, event: str, detail: str = ""):
     conn = _conn()

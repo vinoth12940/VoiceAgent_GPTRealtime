@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>P&C Insurance Voice Agent - WebSocket Mode</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 p-6 min-h-screen">
+  <div class="max-w-6xl mx-auto">
+    <!-- Header with mode indicator -->
+    <div class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 mb-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-slate-900">P&C Insurance Voice Agent</h1>
+          <p class="text-sm text-slate-600 mt-1">WebSocket Mode 🔌 - Fallback Option</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="inline-flex items-center gap-2 text-sm">
+            <span class="h-2.5 w-2.5 rounded-full bg-slate-300" id="statusDot"></span>
+            <span id="status" class="text-slate-600">idle</span>
+          </span>
+          <button id="connectBtn" class="px-4 py-2 rounded-lg bg-slate-600 text-white hover:bg-slate-700 shadow">
+            Connect via WebSocket
+          </button>
+          <button id="disconnectBtn" class="px-4 py-2 rounded-lg bg-slate-200 text-slate-800 hover:bg-slate-300">
+            Disconnect
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mode Switcher Banner -->
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+      <div class="flex items-start gap-3">
+        <div class="text-blue-600 text-2xl">💡</div>
+        <div class="flex-1">
+          <h3 class="font-semibold text-blue-800 mb-2">Want Better Performance?</h3>
+          <p class="text-sm text-blue-700 mb-2">
+            WebRTC mode offers 50-100ms lower latency and better audio quality with built-in echo cancellation.
+          </p>
+          <a href="index-webrtc.html" class="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-semibold">
+            Switch to WebRTC ⚡
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content (same layout as WebRTC version) -->
+    <div class="grid lg:grid-cols-3 gap-6">
+      <!-- Left Panel -->
+      <div class="lg:col-span-1 space-y-6">
+        <!-- Connection Info -->
+        <div class="bg-white rounded-2xl shadow border border-slate-200 p-5">
+          <h2 class="font-semibold text-slate-800 mb-3">Connection</h2>
+          <div class="text-sm">
+            <span class="text-slate-600">Mode: </span>
+            <span class="font-semibold text-slate-600">WebSocket 🔌</span>
+          </div>
+          <p class="text-xs text-slate-500 mt-3">
+            Using WebSocket proxy mode. For better performance, try WebRTC mode.
+          </p>
+        </div>
+
+        <!-- Verification Form -->
+        <div class="bg-white rounded-2xl shadow border border-slate-200 p-5">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="font-semibold text-slate-800">Customer Verification</h2>
+            <span id="verifyStatusBadge" class="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600">Not verified</span>
+          </div>
+          <div class="space-y-2 mt-3">
+            <input id="vEmail" type="email" placeholder="Email" class="w-full px-3 py-2 border rounded-lg text-sm">
+            <input id="vName" type="text" placeholder="Full name" class="w-full px-3 py-2 border rounded-lg text-sm">
+            <input id="vLast4" type="text" placeholder="Last 4 digits" maxlength="4" class="w-full px-3 py-2 border rounded-lg text-sm">
+            <input id="vOrder" type="text" placeholder="Policy/Order ID (optional)" class="w-full px-3 py-2 border rounded-lg text-sm">
+            <button id="demoBtn" class="w-full px-3 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 font-medium">
+              📝 Load Demo Data
+            </button>
+          </div>
+        </div>
+
+        <!-- Policies -->
+        <div class="bg-white rounded-2xl shadow border border-slate-200 p-5">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="font-semibold text-slate-800">Policies</h2>
+            <button id="refreshPolicies" class="text-xs px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-600">
+              Refresh
+            </button>
+          </div>
+          <div id="policyList" class="text-sm text-slate-500">
+            No policies loaded
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel - Conversation -->
+      <div class="lg:col-span-2">
+        <div class="bg-white rounded-2xl shadow border border-slate-200 p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="font-semibold text-slate-800">Conversation</h2>
+            <div class="text-xs text-slate-500" id="connectionStatus">Not connected</div>
+          </div>
+          <div id="transcript" class="space-y-1 h-[600px] overflow-y-auto pr-2 p-4 bg-gradient-to-br from-slate-50 to-blue-50 rounded-xl">
+            <div class="text-center text-slate-400 text-sm py-8">
+              <div class="mb-2">🔌</div>
+              <div>Click "Connect via WebSocket" to start your conversation</div>
+              <div class="text-xs mt-1">WebSocket fallback mode</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audio element -->
+    <audio id="remoteAudio" autoplay style="display: none;"></audio>
+  </div>
+
+  <!-- Load WebSocket app.js -->
+  <script src="app.js"></script>
+</body>
+</html>
+

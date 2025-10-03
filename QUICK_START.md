@@ -1,6 +1,6 @@
 # 🚀 Quick Start - Voice Agent GPT Realtime
 
-Get your P&C insurance voice agent running in **5 minutes**!
+Get your P&C insurance voice agent running in **5 minutes** with **WebRTC mode** for ultra-low latency!
 
 ## ⚡ **Instant Setup**
 
@@ -22,28 +22,35 @@ uvicorn backend.main:app --reload --host 0.0.0.0 --port 8001
 ```
 
 ### **3. Open the Application**
-- **Browser**: `http://localhost:8001`
-- **You'll see**: Professional P&C insurance voice agent interface
+- **Browser**: `http://localhost:8001` (auto-redirects to WebRTC mode ⚡)
+- **Direct WebRTC**: `http://localhost:8001/index-webrtc.html`
+- **You'll see**: Professional P&C insurance voice agent with modern chat interface
 
 ---
 
-## 🎯 **5-Minute Test Flow**
+## 🎯 **5-Minute Test Flow (WebRTC Mode - Default)**
 
 ### **Step 1: Connect to AI**
-1. **Click "Connect"** - Watch status turn green ✅
-2. **See**: "Connected to GPT Realtime!" message
+1. **Click "Connect via WebRTC"** - Watch status turn green ✅
+2. **See**: "🎉 Connected! Configuring AI agent..." message
 3. **Grant**: Microphone permissions when prompted
+4. **Auto-configured**: Ultra-low latency WebRTC connection established
 
 ### **Step 2: Load Demo Data**
-1. **Click "Demo"** - Loads realistic customer info
+1. **Click "Demo Data"** - Loads realistic customer info
 2. **See**: Demo P&C customer data populated
 3. **Data**: Heather Gray, maria92@example.com, Last4: 1234
+4. **Note**: System accepts both "Gray" and "Grey" spelling
 
 ### **Step 3: Test Voice Interaction**
 1. **Start Speaking**: "Hi, I need help with my insurance policy"
-2. **AI Responds**: Professional P&C specialist introduction
-3. **Follow Prompts**: Provide email, name, and last 4 digits when asked
-4. **Experience**: Natural voice conversation with policy details
+2. **AI Responds**: You'll see:
+   - 🤖 **AI message on LEFT** with blue gradient bubble
+   - 👤 **Your message on RIGHT** with green gradient bubble
+   - **Typing indicator** (●●●) as AI speaks
+3. **Watch Magic**: Form fields auto-populate as you speak
+4. **Follow Prompts**: AI will verify email (spelled character-by-character), full name, and last 4 digits
+5. **Experience**: Natural, low-latency voice conversation with policy details
 
 ---
 
@@ -70,13 +77,18 @@ uvicorn backend.main:app --reload --host 0.0.0.0 --port 8001
 
 ## ✅ **Success Indicators**
 
-### **🟢 Everything Working:**
-- Status shows "connected" with green dot
-- AI introduces itself as P&C insurance specialist
+### **🟢 Everything Working (WebRTC Mode):**
+- Status shows "Connected via WebRTC ⚡" with green dot
+- AI introduces itself as "Alex", P&C insurance specialist
+- Beautiful chat interface with avatars appears:
+  - 🤖 Robot avatar for AI on the LEFT
+  - 👤 Person avatar for you on the RIGHT
 - Microphone captures your voice (see browser permission)
-- AI responds naturally when you stop speaking
+- Form fields flash yellow/blue as they auto-populate
+- AI responds with ultra-low latency (50-100ms)
+- Typing indicators (●●●) show when AI is speaking
 - Customer verification works with demo data
-- Policy information is retrieved and explained
+- Policy information is retrieved and explained with ✅ system notifications
 
 ### **📊 Browser Console (F12):**
 ```

@@ -20,31 +20,58 @@ A sophisticated real-time voice AI agent powered by OpenAI's latest GPT Realtime
 
 ## 🌟 Features
 
-- **🎤 Real-time Voice AI**: Powered by OpenAI's `gpt-realtime` model with server-side Voice Activity Detection (VAD)
+- **⚡ WebRTC Mode (Default)**: Ultra-low latency (50-100ms) direct peer-to-peer audio with built-in echo cancellation
+- **🎤 Real-time Voice AI**: Powered by OpenAI's `gpt-4o-realtime-preview` model with server-side Voice Activity Detection (VAD)
 - **🔧 Advanced Tool Calling**: Intelligent function calling for customer verification and policy management
-- **🌐 WebSocket Communication**: Seamless real-time bidirectional communication with OpenAI Realtime API
-- **🔐 Customer Verification**: Secure multi-factor customer verification system
+- **🌐 Dual Connection Modes**: WebRTC (default) for best performance, WebSocket fallback for compatibility
+- **🔐 Customer Verification**: Secure multi-factor customer verification system with session tracking
 - **📋 P&C Policy Management**: Comprehensive Property & Casualty insurance policy database
 - **🎯 Access Control**: Role-based access for internal and restricted policies
-- **💻 Modern UI**: Clean, responsive interface built with Tailwind CSS
-- **🔊 Direct Audio Processing**: Float32 → PCM16 conversion for optimal audio quality
-- **📊 Real-time Transcription**: Live conversation transcripts with partial updates
+- **💻 Modern UI**: Beautiful chat interface with real-time avatars and smooth animations
+- **🔊 Direct Audio Processing**: High-quality PCM16 audio with automatic gain control
+- **📊 Real-time Transcription**: Live conversation transcripts with typing indicators
 
 ## 🏗️ Architecture
 
 ```
-Frontend (WebSocket) ←→ Backend (FastAPI) ←→ OpenAI Realtime API
-                         ↓
-                    SQLite Database
-                  (Policies & Customers)
+                    ┌─────────────────────────────┐
+                    │   Frontend (Browser)        │
+                    │  - WebRTC (Default) ⚡      │
+                    │  - WebSocket (Fallback) 🔌  │
+                    └────────────┬────────────────┘
+                                 │
+                    ┌────────────▼────────────────┐
+                    │  Backend (FastAPI)          │
+                    │  - Ephemeral Token Creation │
+                    │  - Session Verification     │
+                    │  - Business Logic           │
+                    └────────┬──────────┬─────────┘
+                             │          │
+               ┌─────────────▼──┐    ┌──▼──────────────┐
+               │ OpenAI Realtime│    │ SQLite Database │
+               │      API       │    │  - Policies     │
+               │  (WebRTC/WS)   │    │  - Customers    │
+               └────────────────┘    └─────────────────┘
 ```
 
 ### Core Components
 
-- **Frontend**: Real-time WebSocket client with direct audio processing
-- **Backend**: FastAPI server with WebSocket proxy and business logic
+- **Frontend**: Dual-mode client (WebRTC for best performance, WebSocket fallback) with direct audio processing
+- **Backend**: FastAPI server with ephemeral token generation, session verification, and business logic
 - **Database**: SQLite with P&C insurance policies and customer data
-- **OpenAI Integration**: Latest GPT Realtime API with server-side VAD
+- **OpenAI Integration**: GPT-4o Realtime API with WebRTC and WebSocket support
+
+### 🔌 Connection Modes
+
+| Feature | WebRTC ⚡ (Default) | WebSocket 🔌 (Fallback) |
+|---------|-------------------|------------------------|
+| **Latency** | 50-100ms | 150-300ms |
+| **Audio Quality** | Excellent (direct peer-to-peer) | Good |
+| **Echo Cancellation** | Built-in | Browser-level |
+| **Best For** | Voice agents, real-time conversations | Server-side integrations |
+| **URL** | `http://localhost:8001` (default) | `http://localhost:8001/index-websocket.html` |
+
+**Default Mode**: The application automatically uses WebRTC for the best experience. WebSocket mode is available as a fallback for compatibility.
 
 ## 🛠️ Installation
 
@@ -73,11 +100,11 @@ Frontend (WebSocket) ←→ Backend (FastAPI) ←→ OpenAI Realtime API
 
 3. **Start the server**
    ```bash
-   cd backend && python -m uvicorn main:app --reload
+   uvicorn backend.main:app --reload --host 0.0.0.0 --port 8001
    ```
 
 4. **Open your browser**
-   Navigate to `http://localhost:8000`
+   Navigate to `http://localhost:8001` (auto-redirects to WebRTC mode ⚡)
 
 #### Option 2: Manual Setup
 
@@ -118,29 +145,49 @@ Frontend (WebSocket) ←→ Backend (FastAPI) ←→ OpenAI Realtime API
 
 ## 🚀 Usage
 
-### Quick Start
+### Quick Start (WebRTC Mode - Default ⚡)
 
-1. **Connect**: Click "Connect" to establish WebSocket connection
-2. **Demo Data**: Click "Demo" to load sample customer information
-3. **Start Conversation**: Begin speaking naturally - the AI will respond automatically
-4. **Verification**: Provide customer details when prompted for policy access
+1. **Connect**: Click "Connect via WebRTC" to establish ultra-low latency connection
+2. **Demo Data**: Click "Demo Data" to load sample customer information (maria92@example.com)
+3. **Start Conversation**: Begin speaking naturally - the AI will respond with voice automatically
+4. **Watch the UI**: 
+   - 🤖 AI messages appear on the LEFT with robot avatar
+   - 👤 Your messages appear on the RIGHT with person avatar
+   - Form fields auto-populate as you speak
+5. **Verification**: Provide customer details when prompted for policy access
 
 ### Voice Interaction Flow
 
-1. **Greeting**: AI introduces itself as P&C insurance specialist
-2. **Verification**: Requests email, name, and last 4 digits for identity verification
-3. **Policy Lookup**: Retrieves and explains specific policy details
-4. **Natural Conversation**: Responds to questions about coverage, premiums, and terms
+1. **Greeting**: AI introduces itself as Alex, P&C insurance specialist
+2. **Verification State Machine**: 
+   - Step 1: AI requests email and spells it back character-by-character
+   - Step 2: AI requests full name and confirms
+   - Step 3: AI requests last 4 digits and confirms digit-by-digit
+   - Step 4: AI calls verification tool and confirms status
+3. **Policy Lookup**: Retrieves and explains specific P&C insurance policy details
+4. **Natural Conversation**: Responds to questions about coverage, premiums, due dates, and terms
+
+### Switching Between Modes
+
+- **WebRTC (Default)**: `http://localhost:8001` or `http://localhost:8001/index-webrtc.html`
+- **WebSocket (Fallback)**: `http://localhost:8001/index-websocket.html`
+- **Choose Mode**: `http://localhost:8001/index-choose.html`
 
 ## 🔧 API Endpoints
 
 ### Core Endpoints
-- `GET /` - Main application interface
-- `WebSocket /ws/realtime` - Real-time voice communication proxy
+- `GET /` - Main application interface (auto-redirects to WebRTC)
+- `GET /index-webrtc.html` - WebRTC mode interface (default)
+- `GET /index-websocket.html` - WebSocket mode interface (fallback)
+- `GET /index-choose.html` - Connection mode selection page
+- `WebSocket /ws/realtime` - Real-time voice communication proxy (WebSocket mode)
+
+### WebRTC Endpoints
+- `GET /api/realtime/token` - Generate ephemeral token for WebRTC connection
 
 ### Authentication & Verification
-- `POST /api/verify` - Verify customer credentials
-- `POST /api/realtime/session` - Create ephemeral OpenAI session
+- `POST /api/verify` - Verify customer credentials (requires X-Session-Id header)
+- `POST /api/realtime/session` - Create ephemeral OpenAI session (WebSocket mode)
 
 ### Policy Management
 - `GET /api/policies` - List all policies
@@ -272,17 +319,32 @@ policies (
 
 ## 🎨 Frontend Features
 
-### Audio Processing
+### WebRTC Audio Processing (Default Mode)
+- **Peer-to-Peer Connection**: Direct RTC connection with OpenAI for ultra-low latency
+- **Built-in Echo Cancellation**: WebRTC's native acoustic echo cancellation (AEC)
+- **Automatic Gain Control**: Optimized audio levels for consistent experience
+- **Data Channel Events**: Real-time event streaming for session management
+- **PCM16 Audio**: High-quality 24kHz audio with mono channel
+
+### WebSocket Audio Processing (Fallback Mode)
 - **Direct Float32 Processing**: ScriptProcessor for real-time audio capture
 - **PCM16 Conversion**: Optimized audio format for OpenAI Realtime API
 - **Server-side VAD**: Automatic speech detection without client-side processing
 - **Web Audio API**: Professional audio playback with queue management
 
-### UI Components
-- **Real-time Transcription**: Live conversation display with partial updates
-- **Connection Status**: Visual indicators for WebSocket and AI connection states
+### Modern Chat UI
+- **Beautiful Message Bubbles**: Gradient bubbles with avatars and animations
+  - 🤖 AI Agent (Alex): Blue gradient, left side, robot avatar
+  - 👤 User: Green gradient, right side, person avatar
+  - ⚠️ System: Amber gradient, center, for notifications
+- **Real-time Transcription**: Live conversation display with typing indicators (●●●)
+- **Auto-Form Population**: Form fields automatically fill as you speak
+- **Visual Feedback**: Fields flash yellow/blue when auto-populated
+- **Connection Status**: Real-time indicators for connection and verification states
+- **Smooth Animations**: Fade-in effects and smooth scrolling
+- **Custom Scrollbar**: Sleek, modern scrollbar design
 - **Demo Data**: One-click loading of sample customer information
-- **Policy Display**: Formatted display of customer policies and coverage details
+- **Policy Display**: Formatted display of customer P&C insurance policies
 
 ## 🧪 Testing
 

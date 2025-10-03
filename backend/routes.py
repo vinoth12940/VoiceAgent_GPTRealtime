@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Header
+from fastapi import APIRouter, HTTPException, Header, Request
 from fastapi.responses import JSONResponse
 from . import db, auth
 from .models import SeedPayload, VerificationRequest, PolicyQuery
@@ -217,3 +217,85 @@ def api_get_coverage_info(coverage_type: str, x_session_id: str = Header(default
         raise HTTPException(403, "Verification required for detailed coverage information")
     
     return policy
+
+
+@router.post("/transfer-to-agent")
+async def transfer_to_human_agent(
+    request: Request,
+    x_session_id: str = Header(..., alias="X-Session-Id")
+):
+    """
+    Initiate transfer to human agent
+    
+    This endpoint handles escalation from AI to human agent with full context.
+    In a production system, this would integrate with:
+    - Queue management system (e.g., Five9, Genesys)
+    - CRM system (e.g., Salesforce, Zendesk)
+    - Agent routing system
+    
+    For now, it logs the transfer request and returns a mock response.
+    """
+    import json
+    from datetime import datetime
+    
+    # Parse transfer request
+    body = await request.json()
+    
+    # Extract transfer details
+    transfer_data = {
+        "transfer_id": f"TRF-{datetime.utcnow().strftime('%Y%m%d')}-{hash(x_session_id) % 100000:05d}",
+        "session_id": body.get("session_id"),
+        "reason": body.get("reason"),
+        "customer_email": body.get("customer_email"),
+        "customer_name": body.get("customer_name"),
+        "summary": body.get("summary"),
+        "conversation_history": body.get("conversation_history", []),
+        "timestamp": body.get("timestamp"),
+        "verified": body.get("verified", False),
+        "created_at": datetime.utcnow().isoformat()
+    }
+    
+    # Log transfer for audit (in production, save to database)
+    print(f"\n{'='*80}")
+    print(f"🚨 AGENT TRANSFER REQUEST")
+    print(f"{'='*80}")
+    print(f"Transfer ID: {transfer_data['transfer_id']}")
+    print(f"Reason: {transfer_data['reason']}")
+    print(f"Customer: {transfer_data['customer_name']} ({transfer_data['customer_email']})")
+    print(f"Verified: {transfer_data['verified']}")
+    print(f"Summary: {transfer_data['summary']}")
+    print(f"\nConversation History ({len(transfer_data['conversation_history'])} messages):")
+    for msg in transfer_data['conversation_history'][-5:]:  # Last 5 messages
+        role = msg.get('role', 'unknown')
+        content = msg.get('content', '')[:100]
+        print(f"  {role}: {content}...")
+    print(f"{'='*80}\n")
+    
+    # In production, you would:
+    # 1. Save transfer request to database
+    # db.save_transfer_request(transfer_data)
+    
+    # 2. Add to agent queue
+    # queue_service.add_to_queue(transfer_data)
+    
+    # 3. Notify available agents
+    # notification_service.notify_agents(transfer_data)
+    
+    # 4. Get real queue position and wait time
+    # queue_position = queue_service.get_position()
+    # estimated_wait = queue_service.estimate_wait_time()
+    
+    # Mock response for now
+    return {
+        "transfer_initiated": True,
+        "transfer_id": transfer_data["transfer_id"],
+        "queue_position": 2,  # Mock: In a real system, this would come from queue service
+        "estimated_wait": "< 2 minutes",  # Mock: Calculate based on current queue
+        "agent_notified": True,
+        "message": "Transfer request received. A human agent will be with you shortly.",
+        "customer_context": {
+            "email": transfer_data["customer_email"],
+            "name": transfer_data["customer_name"],
+            "verified": transfer_data["verified"]
+        }
+    }

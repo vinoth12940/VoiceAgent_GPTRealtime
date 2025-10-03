@@ -28,6 +28,11 @@ let audioElement = null;
 let verified = false;
 const sessionId = crypto.randomUUID();
 
+// Escalation tracking
+let verificationAttempts = 0;
+let conversationHistory = [];
+let transferInProgress = false;
+
 // keep separate partial bubbles so agent/user don't overwrite each other
 let partialAgentEl = null;
 let partialUserEl = null;
@@ -272,12 +277,27 @@ Once verified, you can:
 - Answer questions about auto, home, commercial, and umbrella insurance
 - Explain premiums, deductibles, coverage limits, and policy terms
 
+# Human Agent Escalation
+Transfer to a human agent by calling transfer_to_human_agent when:
+1. **Customer Requests**: "speak to a human", "transfer to agent", "I want to talk to a person"
+2. **Verification Failures**: After 3 failed verification attempts
+3. **Complex Queries**: Questions outside your knowledge (billing disputes, policy changes, claims processing)
+4. **Customer Frustration**: Detect phrases like:
+   - "This isn't working"
+   - "You're not helping"
+   - "This is ridiculous"
+   - "I'm getting frustrated"
+   - Repeated same question 3+ times
+
+When transferring, say: "I understand. Let me connect you with one of our specialist agents who can better assist you. They'll have access to all the information we've discussed. Please hold for a moment."
+
 # Important Rules
 - ONLY speak English (never Spanish or other languages)
 - Complete your full sentence before pausing
 - Don't interrupt yourself mid-sentence
 - Wait for user confirmation before moving to next state
-- Be patient and natural`,
+- Be patient and natural
+- Monitor for customer frustration and offer human agent proactively`,
           voice: "shimmer",
           input_audio_format: "pcm16",
           output_audio_format: "pcm16",
@@ -346,6 +366,30 @@ Once verified, you can:
                   }
                 },
                 required: ["coverage_type"]
+              }
+            },
+            {
+              type: "function",
+              name: "transfer_to_human_agent",
+              description: "Transfer the customer to a human agent. Use this when: 1) Customer explicitly requests to speak with a human, 2) You cannot help with their complex query, 3) Customer seems frustrated or upset, 4) After 3 failed verification attempts. Provide a clear reason for the transfer.",
+              parameters: {
+                type: "object",
+                properties: {
+                  reason: { 
+                    type: "string",
+                    enum: ["customer_request", "complex_query", "verification_failed", "technical_issue", "customer_frustrated"],
+                    description: "The reason for transferring to a human agent"
+                  },
+                  customer_email: {
+                    type: "string",
+                    description: "Customer's email if available"
+                  },
+                  summary: {
+                    type: "string",
+                    description: "Brief summary of the conversation and what the customer needs help with"
+                  }
+                },
+                required: ["reason", "summary"]
               }
             }
           ]
@@ -447,6 +491,9 @@ function handleRealtimeEvent(evt) {
   if (evt.type === "conversation.item.input_audio_transcription.completed") {
     const text = evt.transcript || "(audio)";
     
+    // Track conversation history for agent handoff
+    conversationHistory.push({ role: "user", content: text, timestamp: new Date().toISOString() });
+    
     // Try to auto-populate form fields from user speech
     tryPopulateFormFromTranscript(text);
     
@@ -497,6 +544,10 @@ function handleRealtimeEvent(evt) {
       partialAgentEl.textContent = finalText;
       partialAgentEl.classList.remove('opacity-80', 'animate-pulse');
       console.log("✅ AI message complete:", finalText);
+      
+      // Track conversation history for agent handoff
+      conversationHistory.push({ role: "assistant", content: finalText, timestamp: new Date().toISOString() });
+      
       partialAgentEl = null;
     }
     return;
@@ -597,35 +648,53 @@ async function handleToolCall(evt) {
     
     if (toolName === "verify_customer") {
       console.log("🔍 Verifying customer - AI args:", args);
+      console.log("📋 Current form values BEFORE update:", {
+        email: vEmail.value,
+        name: vName.value,
+        last4: vLast4.value,
+        order: vOrder.value
+      });
+      
+      // STRATEGY: Use AI's values to populate form, then verify from form
+      // This ensures user sees exactly what's being verified
       
       // Update form fields with AI's values if form is empty
-      // This lets the user see what the AI heard
       if (!vEmail.value && args.email) {
         vEmail.value = args.email;
         highlightField(vEmail);
+        console.log("📝 Populated email:", args.email);
       }
       if (!vName.value && args.full_name) {
         vName.value = args.full_name;
         highlightField(vName);
+        console.log("📝 Populated name:", args.full_name);
       }
       if (!vLast4.value && args.last4) {
         vLast4.value = args.last4;
         highlightField(vLast4);
+        console.log("📝 Populated last4:", args.last4);
       }
       if (!vOrder.value && args.order_id) {
         vOrder.value = args.order_id;
         highlightField(vOrder);
+        console.log("📝 Populated order_id:", args.order_id);
       }
       
-      // IMPORTANT: Always use form values for verification (they're what user confirmed)
+      // Build verification data - Use form values (what user sees) OR AI values as fallback
       const verifyData = {
-        email: vEmail.value,
-        full_name: vName.value,
-        last4: vLast4.value,
-        order_id: vOrder.value
+        email: vEmail.value || args.email || "",
+        full_name: vName.value || args.full_name || "",
+        last4: vLast4.value || args.last4 || "",
+        order_id: vOrder.value || args.order_id || ""
       };
       
-      console.log("📤 Sending verification with form values:", verifyData);
+      console.log("📤 Sending verification with data:", verifyData);
+      console.log("📋 Form values AFTER update:", {
+        email: vEmail.value,
+        name: vName.value,
+        last4: vLast4.value,
+        order: vOrder.value
+      });
       
       // Call backend API to verify customer - with session tracking
       const response = await fetch("/api/verify", {
@@ -641,15 +710,32 @@ async function handleToolCall(evt) {
       // Update local verification state
       verified = !!result.verified;
       
+      // Track verification attempts
+      if (!verified) {
+        verificationAttempts++;
+        console.log(`⚠️ Verification attempt ${verificationAttempts}/3 failed`);
+        
+        // After 3 failed attempts, suggest human agent
+        if (verificationAttempts >= 3) {
+          makeBubble({ 
+            who: "system", 
+            text: "⚠️ Multiple verification attempts failed. Suggesting transfer to human agent..."
+          });
+        }
+      } else {
+        verificationAttempts = 0; // Reset on success
+      }
+      
       // Update verification status badge
-      verifyStatusBadge.textContent = verified ? "Verified" : "Not verified";
+      verifyStatusBadge.textContent = verified ? "Verified" : `Not verified (${verificationAttempts}/3)`;
       verifyStatusBadge.className =
         "text-xs px-2 py-1 rounded-full " +
-        (verified ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600");
+        (verified ? "bg-emerald-100 text-emerald-700" : 
+         verificationAttempts >= 3 ? "bg-red-100 text-red-700" : "bg-slate-100 text-slate-600");
       
-      makeBubble({ who: "system", text: verified ? "✅ Customer verified!" : "❌ Verification failed" });
+      makeBubble({ who: "system", text: verified ? "✅ Customer verified!" : `❌ Verification failed (Attempt ${verificationAttempts}/3)` });
       console.log("✅ Verification result:", result);
-      console.log("📝 Session ID:", sessionId, "Verified:", verified);
+      console.log("📝 Session ID:", sessionId, "Verified:", verified, "Attempts:", verificationAttempts);
       
     } else if (toolName === "get_customer_policies") {
       console.log("📋 Fetching customer policies:", args);
@@ -706,6 +792,68 @@ async function handleToolCall(evt) {
         result = await response.json();
         makeBubble({ who: "system", text: `📚 ${args.coverage_type} coverage information retrieved` });
         console.log("✅ Coverage info fetched:", result);
+      }
+      
+    } else if (toolName === "transfer_to_human_agent") {
+      console.log("🚨 Transferring to human agent:", args);
+      
+      transferInProgress = true;
+      
+      // Show transfer UI
+      makeBubble({ 
+        who: "system", 
+        text: `🔄 Transferring to human agent...\nReason: ${args.reason.replace(/_/g, ' ')}`
+      });
+      
+      // Prepare transfer data
+      const transferData = {
+        session_id: sessionId,
+        reason: args.reason,
+        customer_email: args.customer_email || vEmail.value,
+        customer_name: vName.value,
+        summary: args.summary,
+        conversation_history: conversationHistory,
+        timestamp: new Date().toISOString(),
+        verified: verified
+      };
+      
+      console.log("📤 Transfer data:", transferData);
+      
+      // Call backend API to initiate transfer
+      const response = await fetch("/api/transfer-to-agent", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "X-Session-Id": sessionId
+        },
+        body: JSON.stringify(transferData)
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("❌ Transfer failed:", response.status, errorText);
+        result = { 
+          transfer_initiated: false,
+          error: "Transfer failed",
+          message: `Could not initiate transfer (${response.status})`
+        };
+        makeBubble({ 
+          who: "system", 
+          text: "❌ Transfer failed. Please try again or call our support line directly."
+        });
+      } else {
+        result = await response.json();
+        
+        makeBubble({ 
+          who: "system", 
+          text: `✅ Transfer initiated!\n\n📋 Transfer Details:\n- Queue Position: ${result.queue_position || 'Next available'}\n- Estimated Wait: ${result.estimated_wait || '< 2 minutes'}\n- Transfer ID: ${result.transfer_id}\n\n💬 A human agent will be with you shortly. They'll have access to all the information we discussed.`
+        });
+        
+        // Disable further interaction
+        if (result.transfer_initiated) {
+          console.log("✅ Transfer initiated successfully");
+          // Could disconnect WebRTC here or keep it open for agent takeover
+        }
       }
       
     } else {
