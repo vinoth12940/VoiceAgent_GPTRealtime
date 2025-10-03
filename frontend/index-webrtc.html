@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Realtime CSR Voice Agent - WebRTC ⚡</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .animate-fadeIn {
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .animate-slideUp {
+      animation: slideUp 0.4s ease-out;
+    }
+    
+    /* Smooth scrolling for transcript */
+    #transcript {
+      scroll-behavior: smooth;
+    }
+    
+    /* Custom scrollbar */
+    #transcript::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    #transcript::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 10px;
+    }
+    
+    #transcript::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 10px;
+    }
+    
+    #transcript::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 p-6 min-h-screen">
+  <div class="max-w-6xl mx-auto">
+    <div class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 mb-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-slate-900">P&C Insurance Voice Agent</h1>
+          <p class="text-sm text-slate-600 mt-1">WebRTC Mode ⚡ - Lower Latency</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="inline-flex items-center gap-2 text-sm">
+            <span class="h-2.5 w-2.5 rounded-full bg-slate-300" id="statusDot"></span>
+            <span id="status" class="text-slate-600">idle</span>
+          </span>
+          <button id="connectBtn"
+                  class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 shadow">
+            Connect via WebRTC
+          </button>
+          <button id="activateAudioBtn"
+                  class="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 shadow">
+            🔊 Activate Audio
+          </button>
+          <button id="disconnectBtn"
+                  class="px-4 py-2 rounded-lg bg-slate-200 text-slate-800 hover:bg-slate-300">
+            Disconnect
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Instructions Banner -->
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+      <div class="flex items-start gap-3">
+        <div class="text-blue-600 text-2xl">⚡</div>
+        <div class="flex-1">
+          <h3 class="font-semibold text-blue-800 mb-2">WebRTC Mode - Lower Latency!</h3>
+          <ol class="text-sm text-blue-700 space-y-1 list-decimal list-inside">
+            <li><strong>Connect:</strong> Click "Connect via WebRTC" to establish a low-latency connection</li>
+            <li><strong>Test:</strong> Click "Demo" to load sample customer data for testing</li>
+            <li><strong>Talk:</strong> Speak naturally - the AI will respond with voice</li>
+            <li><strong>Benefits:</strong> 50-100ms lower latency, better audio quality, automatic echo cancellation</li>
+          </ol>
+          <div class="mt-3 text-xs text-blue-600">
+            💡 <strong>Pro Tip:</strong> WebRTC provides the best experience for voice agents with minimal latency!
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="grid lg:grid-cols-3 gap-6">
+      <!-- Left: Controls & Verification -->
+      <div class="lg:col-span-1 space-y-6">
+        <!-- Call info -->
+        <div class="bg-white rounded-2xl shadow border border-slate-200 p-5">
+          <h2 class="font-semibold text-slate-800 mb-3">Connection</h2>
+          <p class="text-xs text-slate-500 mt-3">
+            WebRTC provides direct peer-to-peer audio with lower latency and better quality than WebSocket.
+          </p>
+          <div class="mt-3 text-sm">
+            <span class="text-slate-600">Mode: </span>
+            <span class="font-semibold text-blue-600">WebRTC ⚡</span>
+          </div>
+        </div>
+
+        <!-- Verification -->
+        <div class="bg-white rounded-2xl shadow border border-slate-200 p-5">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="font-semibold text-slate-800">Customer Verification</h2>
+            <span id="verifyStatusBadge"
+                  class="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600">Not verified</span>
+          </div>
+          <div class="space-y-2 mt-3">
+            <input id="vEmail" type="email" placeholder="Email" class="w-full px-3 py-2 border rounded-lg text-sm">
+            <input id="vName" type="text" placeholder="Full name" class="w-full px-3 py-2 border rounded-lg text-sm">
+            <input id="vLast4" type="text" placeholder="Last 4 digits" maxlength="4" class="w-full px-3 py-2 border rounded-lg text-sm">
+            <input id="vOrder" type="text" placeholder="Policy/Order ID (optional)" class="w-full px-3 py-2 border rounded-lg text-sm">
+          </div>
+          <button id="verifyBtn" class="mt-3 w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm shadow">
+            Submit Verification
+          </button>
+          <button id="demoBtn" class="mt-2 w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm shadow">
+            Demo Data
+          </button>
+          <p id="verifyStatus" class="mt-2 text-xs text-slate-500"></p>
+        </div>
+
+        <!-- Policies -->
+        <div class="bg-white rounded-2xl shadow border border-slate-200 p-5">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="font-semibold text-slate-800">Policies</h2>
+            <button id="refreshPolicies" class="text-xs text-blue-600 hover:underline">Refresh</button>
+          </div>
+          <div id="policyList" class="text-sm text-slate-600 mt-2 space-y-1">
+            <div class="text-xs text-slate-400">No policies loaded</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Transcript -->
+      <div class="lg:col-span-2">
+        <div class="bg-white rounded-2xl shadow border border-slate-200 p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="font-semibold text-slate-800">Conversation</h2>
+            <div class="flex items-center gap-2">
+              <div class="text-xs text-slate-500">
+                <span id="connectionStatus">Not connected</span>
+              </div>
+            </div>
+          </div>
+          <div id="transcript" class="space-y-1 h-[600px] overflow-y-auto pr-2 p-4 bg-gradient-to-br from-slate-50 to-blue-50 rounded-xl">
+            <div class="text-center text-slate-400 text-sm py-8">
+              <div class="mb-2">⚡</div>
+              <div>Click "Connect via WebRTC" to start your conversation</div>
+              <div class="text-xs mt-1">Lower latency for the best voice experience</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="mt-6 bg-amber-50 border border-amber-200 rounded-lg p-4">
+      <div class="flex items-start gap-3">
+        <div class="text-amber-600 text-xl">⚠️</div>
+        <div class="flex-1">
+          <h3 class="font-semibold text-amber-800 mb-2">Important Notes</h3>
+          <div class="text-sm text-amber-700 space-y-2">
+            <div><strong>Quota Check:</strong> Make sure you have credits in your OpenAI account</div>
+            <div><strong>Browser:</strong> Works best in Chrome/Edge. Requires microphone permissions</div>
+            <div><strong>Performance:</strong> WebRTC provides ~50-100ms lower latency than WebSocket</div>
+            <div><strong>Fallback:</strong> If WebRTC fails, try the WebSocket version (index.html)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app-webrtc.js"></script>
+</body>
+</html>
+

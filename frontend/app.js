@@ -146,9 +146,13 @@ function clearTranscript() {
 async function initAudioContext() {
   if (!audioContext) {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioContext.state === 'suspended') {
-      await audioContext.resume();
-    }
+    console.log("🔊 Audio context created, state:", audioContext.state);
+  }
+  
+  if (audioContext.state === 'suspended') {
+    console.log("🔊 Resuming suspended audio context...");
+    await audioContext.resume();
+    console.log("🔊 Audio context resumed, state:", audioContext.state);
   }
 }
 
@@ -551,6 +555,27 @@ async function handleRealtimeEvent(evt) {
     return;
   }
   
+  // Debug: Log response data to see what we're getting
+  if (evt.type === "response.done") {
+    console.log("🔍 Response data:", evt.response);
+    if (evt.response && evt.response.status === 'failed') {
+      console.error("❌ RESPONSE FAILED!");
+      console.error("❌ Error details:", evt.response.status_details);
+      if (evt.response.status_details && evt.response.status_details.error) {
+        console.error("❌ FULL ERROR:", JSON.stringify(evt.response.status_details.error, null, 2));
+      }
+    }
+    if (evt.response && evt.response.output) {
+      console.log("🔍 Response output:", evt.response.output);
+      // Check if there's audio in the response
+      if (evt.response.output.some && evt.response.output.some(item => item.type === 'audio')) {
+        console.log("🔊 Found audio in response!");
+      } else {
+        console.log("❌ No audio found in response - only text");
+      }
+    }
+  }
+  
   if (evt.type === "response.audio.done") {
     console.log("✅ Audio response completed");
     return;
@@ -707,6 +732,34 @@ async function handleToolCall(toolCall) {
 // ===== Wire buttons =====
 connectBtn.addEventListener("click", startCall);
 disconnectBtn.addEventListener("click", stopCall);
+
+// Activate Audio button - required for Web Audio API
+document.getElementById("activateAudioBtn").addEventListener("click", async () => {
+  try {
+    console.log("🔊 Activating audio context...");
+    await initAudioContext();
+    
+    // Test audio with a simple beep
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 0.3);
+    
+    console.log("✅ Audio context activated and tested!");
+    makeBubble({ who: "system", text: "🔊 Audio activated! You should hear a beep. Now you can start talking." });
+    
+    // Hide the button after activation
+    document.getElementById("activateAudioBtn").style.display = "none";
+    
+  } catch (error) {
+    console.error("❌ Audio activation failed:", error);
+    makeBubble({ who: "system", text: "❌ Audio activation failed. Check browser console for details." });
+  }
+});
 
 // Demo button functionality - use real P&C customer data
 demoBtn.addEventListener("click", () => {

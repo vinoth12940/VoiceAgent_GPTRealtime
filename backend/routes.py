@@ -59,7 +59,61 @@ def api_audits():
 
 @router.post("/realtime/session")
 async def api_realtime_session():
+    """Create ephemeral session for WebSocket connection"""
     return await auth.create_ephemeral_session()
+
+@router.get("/realtime/token")
+async def api_realtime_token():
+    """Create ephemeral token for WebRTC connection"""
+    import httpx
+    from .config import OPENAI_API_KEY
+    
+    if not OPENAI_API_KEY:
+        raise HTTPException(500, "OPENAI_API_KEY not configured")
+    
+    headers = {
+        "Authorization": f"Bearer {OPENAI_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    
+    # Create ephemeral token for WebRTC - using the sessions endpoint
+    body = {
+        "model": "gpt-4o-realtime-preview-2024-10-01",
+        "voice": "shimmer",
+        "modalities": ["audio", "text"]
+    }
+    
+    async with httpx.AsyncClient(timeout=20.0) as client:
+        try:
+            r = await client.post(
+                "https://api.openai.com/v1/realtime/sessions",
+                headers=headers,
+                json=body
+            )
+            r.raise_for_status()
+            result = r.json()
+            
+            print(f"✅ Ephemeral token created: {result}")
+            
+            # Extract client_secret from the response
+            client_secret = result.get('client_secret', {})
+            if isinstance(client_secret, dict):
+                client_secret_value = client_secret.get('value')
+            else:
+                client_secret_value = client_secret
+            
+            if not client_secret_value:
+                raise HTTPException(500, f"No client_secret in response: {result}")
+            
+            return {
+                "client_secret": client_secret_value,
+                "expires_at": result.get("expires_at"),
+                "session_id": result.get("id")
+            }
+        except httpx.HTTPStatusError as e:
+            error_text = e.response.text
+            print(f"❌ Token creation failed: {error_text}")
+            raise HTTPException(status_code=e.response.status_code, detail=f"OpenAI API error: {error_text}")
 
 @router.get("/policy/search")
 def api_policy_search(q: str, x_session_id: str = Header(default="anon")):

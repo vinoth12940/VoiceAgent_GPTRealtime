@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>P&C Insurance Voice Agent - Choose Connection</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-6">
+  <div class="max-w-4xl w-full">
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-slate-900 mb-2">P&C Insurance Voice Agent</h1>
+      <p class="text-lg text-slate-600">Choose your connection method</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      <!-- WebRTC Option -->
+      <a href="index-webrtc.html" class="block group">
+        <div class="bg-white rounded-2xl shadow-lg border-2 border-blue-200 hover:border-blue-500 transition-all duration-300 p-8 h-full transform hover:scale-105">
+          <div class="text-center">
+            <div class="text-6xl mb-4">⚡</div>
+            <h2 class="text-2xl font-bold text-slate-900 mb-3">WebRTC</h2>
+            <p class="text-sm text-slate-600 mb-4">Recommended for best performance</p>
+            
+            <div class="text-left space-y-2 mb-6">
+              <div class="flex items-start gap-2">
+                <span class="text-green-600 text-xl">✓</span>
+                <span class="text-sm text-slate-700"><strong>50-100ms lower latency</strong></span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-green-600 text-xl">✓</span>
+                <span class="text-sm text-slate-700"><strong>Better audio quality</strong></span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-green-600 text-xl">✓</span>
+                <span class="text-sm text-slate-700"><strong>Built-in echo cancellation</strong></span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-green-600 text-xl">✓</span>
+                <span class="text-sm text-slate-700"><strong>Direct peer-to-peer</strong></span>
+              </div>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p class="text-xs text-blue-700">
+                <strong>Best for:</strong> Browser-based voice agents, real-time conversations
+              </p>
+            </div>
+
+            <div class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg group-hover:bg-blue-700 transition-colors font-semibold">
+              Use WebRTC ⚡
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <!-- WebSocket Option -->
+      <a href="index.html" class="block group">
+        <div class="bg-white rounded-2xl shadow-lg border-2 border-slate-200 hover:border-slate-400 transition-all duration-300 p-8 h-full transform hover:scale-105">
+          <div class="text-center">
+            <div class="text-6xl mb-4">🔌</div>
+            <h2 class="text-2xl font-bold text-slate-900 mb-3">WebSocket</h2>
+            <p class="text-sm text-slate-600 mb-4">Reliable fallback option</p>
+            
+            <div class="text-left space-y-2 mb-6">
+              <div class="flex items-start gap-2">
+                <span class="text-blue-600 text-xl">✓</span>
+                <span class="text-sm text-slate-700"><strong>Stable connection</strong></span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-blue-600 text-xl">✓</span>
+                <span class="text-sm text-slate-700"><strong>Works everywhere</strong></span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-blue-600 text-xl">✓</span>
+                <span class="text-sm text-slate-700"><strong>Server-to-server compatible</strong></span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-blue-600 text-xl">✓</span>
+                <span class="text-sm text-slate-700"><strong>Easier to debug</strong></span>
+              </div>
+            </div>
+
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">
+              <p class="text-xs text-slate-700">
+                <strong>Best for:</strong> Server-side integrations, firewall-restricted environments
+              </p>
+            </div>
+
+            <div class="mt-4 px-4 py-2 bg-slate-600 text-white rounded-lg group-hover:bg-slate-700 transition-colors font-semibold">
+              Use WebSocket 🔌
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Comparison Table -->
+    <div class="mt-8 bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
+      <h3 class="text-lg font-bold text-slate-900 mb-4 text-center">Quick Comparison</h3>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-slate-200">
+              <th class="text-left py-2 px-4 text-slate-700">Feature</th>
+              <th class="text-center py-2 px-4 text-blue-700">WebRTC ⚡</th>
+              <th class="text-center py-2 px-4 text-slate-700">WebSocket 🔌</th>
+            </tr>
+          </thead>
+          <tbody class="text-slate-600">
+            <tr class="border-b border-slate-100">
+              <td class="py-2 px-4">Latency</td>
+              <td class="text-center py-2 px-4 text-green-600 font-semibold">~100-200ms</td>
+              <td class="text-center py-2 px-4">~150-300ms</td>
+            </tr>
+            <tr class="border-b border-slate-100">
+              <td class="py-2 px-4">Audio Quality</td>
+              <td class="text-center py-2 px-4 text-green-600 font-semibold">Excellent</td>
+              <td class="text-center py-2 px-4">Good</td>
+            </tr>
+            <tr class="border-b border-slate-100">
+              <td class="py-2 px-4">Echo Cancellation</td>
+              <td class="text-center py-2 px-4 text-green-600 font-semibold">Built-in</td>
+              <td class="text-center py-2 px-4">Browser-level</td>
+            </tr>
+            <tr class="border-b border-slate-100">
+              <td class="py-2 px-4">Setup Complexity</td>
+              <td class="text-center py-2 px-4">Medium</td>
+              <td class="text-center py-2 px-4 text-green-600 font-semibold">Simple</td>
+            </tr>
+            <tr>
+              <td class="py-2 px-4">Browser Support</td>
+              <td class="text-center py-2 px-4">Modern browsers</td>
+              <td class="text-center py-2 px-4 text-green-600 font-semibold">All browsers</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Important Note -->
+    <div class="mt-6 bg-amber-50 border border-amber-200 rounded-lg p-4">
+      <div class="flex items-start gap-3">
+        <div class="text-amber-600 text-2xl">⚠️</div>
+        <div class="flex-1">
+          <h3 class="font-semibold text-amber-800 mb-2">Before You Start</h3>
+          <div class="text-sm text-amber-700">
+            <p class="mb-2"><strong>Required:</strong> You must have credits in your OpenAI account</p>
+            <p>→ Visit: <a href="https://platform.openai.com/settings/organization/billing" target="_blank" class="underline font-semibold">OpenAI Billing Settings</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+

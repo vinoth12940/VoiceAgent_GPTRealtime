@@ -117,7 +117,29 @@ def verify_customer(email: str, full_name: str = "", last4: str = "", order_id: 
     conn.close()
     if not row:
         return False
-    ok_name = (not full_name) or (full_name.strip().lower() == row["full_name"].lower())
+    
+    # Flexible name matching - handle common variations
+    if full_name:
+        provided_name = full_name.strip().lower()
+        actual_name = row["full_name"].lower()
+        
+        # Exact match
+        ok_name = provided_name == actual_name
+        
+        # If not exact, try common spelling variations
+        if not ok_name:
+            # Handle "Gray" vs "Grey" and other common variations
+            variations = {
+                'grey': 'gray',
+                'gray': 'grey',
+            }
+            normalized_provided = provided_name
+            for old, new in variations.items():
+                normalized_provided = normalized_provided.replace(old, new)
+            ok_name = normalized_provided == actual_name
+    else:
+        ok_name = True
+    
     ok_last4 = (not last4) or (last4 == (row["last4"] or ""))
     ok_order = (not order_id) or (order_id == (row["order_id"] or ""))
     return bool(ok_name and ok_last4 and ok_order)
